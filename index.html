@@ -48,14 +48,21 @@
             .safe-area-pb { padding-bottom: max(10px, env(safe-area-inset-bottom)); }
         }
 
-        /* Print specific styles for Laporan */
+        /* Print specific styles for Laporan & Kwitansi */
         @media print {
             body { background-color: white; }
             nav, header, aside, .mobile-bottom-nav, .no-print { display: none !important; }
             .main-content { margin: 0 !important; padding: 0 !important; width: 100% !important; overflow: visible !important; }
-            #view-laporan { display: block !important; }
             .print-only { display: block !important; }
             .shadow-sm, .shadow-md { box-shadow: none !important; border: none !important; }
+            
+            /* Kontrol tampilan khusus saat print Laporan */
+            body.printing-laporan #view-laporan { display: block !important; }
+            body.printing-laporan #kwitansi-print-area { display: none !important; }
+            
+            /* Kontrol tampilan khusus saat print Kwitansi */
+            body.printing-kwitansi #app { display: none !important; }
+            body.printing-kwitansi #kwitansi-print-area { display: block !important; position: absolute; top:0; left:0; width:100%; }
         }
     </style>
 </head>
@@ -63,6 +70,48 @@
 
     <!-- Toast Notification -->
     <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-2"></div>
+
+    <!-- AREA CETAK KWITANSI (Hidden by default) -->
+    <div id="kwitansi-print-area" class="hidden bg-white text-black p-10 mx-auto border-2 border-slate-800 w-full max-w-3xl absolute top-0 left-0 z-[200]">
+        <div class="border-b-4 border-slate-800 pb-4 mb-6 flex justify-between items-start">
+            <div class="flex items-center gap-4">
+                <i class="fa-solid fa-school text-4xl text-slate-800"></i>
+                <div>
+                    <h1 class="text-2xl font-bold uppercase tracking-wider">KWITANSI PEMBAYARAN</h1>
+                    <p class="text-sm text-slate-600 font-medium" id="k-school">SMA NEGERI 1 NUSANTARA</p>
+                    <p class="text-xs text-slate-500">Jl. Pendidikan No. 1, Jakarta • Telp: (021) 1234567</p>
+                </div>
+            </div>
+            <div class="text-right border-l-2 pl-4 border-slate-300">
+                <p class="text-xs text-slate-500 mb-1">No. Transaksi:</p>
+                <p class="font-bold text-lg text-slate-800 font-mono" id="k-id">TRX-000</p>
+                <p class="text-sm text-slate-600 mt-2" id="k-date">Tgl: -</p>
+            </div>
+        </div>
+        <table class="w-full mb-8 text-base">
+            <tr><td class="py-3 w-1/3 text-slate-600 font-medium">Telah Terima Dari</td><td class="py-3 font-bold text-xl uppercase">: <span id="k-nama"></span></td></tr>
+            <tr><td class="py-3 w-1/3 text-slate-600 font-medium">Nomor Induk Siswa (NIS)</td><td class="py-3">: <span id="k-nis" class="font-mono"></span></td></tr>
+            <tr><td class="py-3 w-1/3 text-slate-600 font-medium">Untuk Pembayaran</td><td class="py-3">: SPP Bulan <span id="k-bulan" class="font-bold"></span></td></tr>
+            <tr><td class="py-3 w-1/3 text-slate-600 font-medium">Metode Pembayaran</td><td class="py-3">: <span id="k-metode"></span></td></tr>
+        </table>
+        <div class="bg-slate-50 p-6 flex justify-between items-center border-2 border-slate-300 rounded-lg shadow-inner mb-8">
+            <span class="text-slate-600 uppercase tracking-widest text-sm font-bold">Jumlah Uang</span>
+            <span class="text-3xl font-bold tracking-tight" id="k-nominal">Rp 0</span>
+        </div>
+        <div class="mt-12 flex justify-between px-8">
+            <div class="text-center">
+                <p class="mb-20 text-sm">Penyetor / Siswa</p>
+                <p class="font-bold border-b border-black inline-block px-4 pb-1" id="k-sign-nama">Nama Siswa</p>
+            </div>
+            <div class="text-center">
+                <p class="mb-20 text-sm">Bendahara Penerima</p>
+                <p class="font-bold border-b border-black inline-block px-4 pb-1">Admin SPP Smart</p>
+            </div>
+        </div>
+        <div class="mt-10 border-t border-dashed border-slate-400 pt-4 text-center text-xs text-slate-400 italic">
+            *Kwitansi ini sah apabila telah divalidasi oleh sistem dan ditandatangani oleh bendahara. Disimpan sebagai bukti pembayaran yang sah.
+        </div>
+    </div>
 
     <!-- LANDING PAGE -->
     <div id="landing-page" class="w-full min-h-screen bg-white transition-opacity duration-500">
@@ -252,6 +301,9 @@
                         <button onclick="navigate('laporan')" id="nav-desktop-laporan" class="nav-item-desktop flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-800 transition text-left text-blue-100">
                             <i class="fa-solid fa-chart-pie w-5 text-center"></i> Laporan
                         </button>
+                        <button onclick="navigate('tagihan')" id="nav-desktop-tagihan" class="nav-item-desktop flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-800 transition text-left text-blue-100">
+                            <i class="fa-solid fa-file-invoice-dollar w-5 text-center"></i> Data Tagihan
+                        </button>
                         <button onclick="navigate('pengaturan')" id="nav-desktop-pengaturan" class="nav-item-desktop flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-blue-800 transition text-left text-blue-100">
                             <i class="fa-solid fa-gear w-5 text-center"></i> Pengaturan
                         </button>
@@ -305,7 +357,19 @@
                               <span id="conn-dot-mobile" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-slate-400"></span>
                             </span>
                         </div>
-                        <div class="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center font-bold text-sm">A</div>
+                        <div class="relative">
+                            <div onclick="toggleMobileProfileMenu()" class="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center font-bold text-sm cursor-pointer hover:bg-blue-600 transition select-none">A</div>
+                            <!-- Dropdown Menu -->
+                            <div id="mobile-profile-menu" class="hidden absolute right-0 mt-3 w-48 bg-white rounded-lg shadow-xl border border-slate-100 z-50 overflow-hidden transform opacity-0 scale-95 transition-all duration-200 origin-top-right">
+                                <div class="px-4 py-3 border-b border-slate-100 bg-slate-50 text-left">
+                                    <p class="text-sm font-semibold text-slate-800">Admin Keuangan</p>
+                                    <p class="text-xs text-slate-500">Bendahara</p>
+                                </div>
+                                <button onclick="logout(); toggleMobileProfileMenu();" class="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition">
+                                    <i class="fa-solid fa-sign-out-alt"></i> Keluar
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </header>
 
@@ -348,7 +412,7 @@
                                     <div class="p-2 bg-red-50 text-red-500 rounded-lg"><i class="fa-solid fa-triangle-exclamation"></i></div>
                                 </div>
                                 <h3 class="text-xl md:text-3xl font-bold text-red-600" id="stat-tunggakan">...</h3>
-                                <p class="text-[10px] md:text-xs text-red-500 mt-2 cursor-pointer hover:underline" onclick="navigate('laporan')">Lihat Detail >></p>
+                                <p class="text-[10px] md:text-xs text-red-500 mt-2 cursor-pointer hover:underline font-medium" onclick="navigate('tagihan')">Lihat Detail >></p>
                             </div>
                         </div>
 
@@ -447,6 +511,12 @@
                                                 <option value="April" selected>April</option>
                                                 <option value="Mei">Mei</option>
                                                 <option value="Juni">Juni</option>
+                                                <option value="Juli">Juli</option>
+                                                <option value="Agustus">Agustus</option>
+                                                <option value="September">September</option>
+                                                <option value="Oktober">Oktober</option>
+                                                <option value="November">November</option>
+                                                <option value="Desember">Desember</option>
                                             </select>
                                         </div>
                                         <div>
@@ -476,16 +546,19 @@
                             <div class="bg-white rounded-xl shadow-sm border border-slate-100 w-full flex flex-col">
                                 <div class="p-5 border-b flex justify-between items-center">
                                     <h3 class="font-bold text-slate-800"><i class="fa-solid fa-clock-rotate-left mr-2 text-slate-500"></i> Riwayat Transaksi Hari Ini</h3>
-                                    <button class="text-xs text-primary hover:underline">Lihat Semua</button>
+                                    <div class="flex gap-2">
+                                        <button class="bg-slate-100 text-slate-600 px-3 py-1.5 rounded text-xs hover:bg-slate-200 border border-slate-200"><i class="fa-solid fa-trash mr-1"></i> Hapus Massal</button>
+                                    </div>
                                 </div>
                                 <div class="p-0 flex-1 overflow-x-auto">
                                     <table class="w-full text-sm text-left">
                                         <thead class="bg-slate-50 text-slate-600 border-b">
                                             <tr>
+                                                <th class="py-2 px-4 w-10"><input type="checkbox" id="check-all-trx" class="rounded cursor-pointer" onclick="toggleAllTrx(this)"></th>
                                                 <th class="py-2 px-4 font-semibold">ID Trans.</th>
                                                 <th class="py-2 px-4 font-semibold">Nama Siswa</th>
                                                 <th class="py-2 px-4 font-semibold">Bulan</th>
-                                                <th class="py-2 px-4 font-semibold">Nominal</th>
+                                                <th class="py-2 px-4 font-semibold text-right">Nominal</th>
                                                 <th class="py-2 px-4 font-semibold text-center">Status</th>
                                                 <th class="py-2 px-4 font-semibold text-center">Aksi</th>
                                             </tr>
@@ -554,7 +627,61 @@
                         </div>
                     </div>
 
-                    <!-- 5. PENGATURAN VIEW (Simple Placeholder) -->
+                    <!-- 5. TAGIHAN / TUNGGAKAN VIEW -->
+                    <div id="view-tagihan" class="view-section hidden animate-fade-in">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                            <h2 class="text-xl font-bold md:hidden">Data Tunggakan</h2>
+                            <div class="flex items-center gap-2 w-full md:w-auto">
+                                <select id="tagihan-bulan" class="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-primary outline-none" onchange="renderTableTagihan()">
+                                    <option value="Januari">Januari</option>
+                                    <option value="Februari">Februari</option>
+                                    <option value="Maret">Maret</option>
+                                    <option value="April" selected>April</option>
+                                    <option value="Mei">Mei</option>
+                                    <option value="Juni">Juni</option>
+                                    <option value="Juli">Juli</option>
+                                    <option value="Agustus">Agustus</option>
+                                    <option value="September">September</option>
+                                    <option value="Oktober">Oktober</option>
+                                    <option value="November">November</option>
+                                    <option value="Desember">Desember</option>
+                                </select>
+                                <select id="tagihan-tahun" class="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-primary outline-none" onchange="renderTableTagihan()">
+                                    <option value="2026">2026</option>
+                                </select>
+                            </div>
+                            <button onclick="kirimTagihanMassal()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 whitespace-nowrap shadow-md w-full md:w-auto flex items-center justify-center gap-2 transition">
+                                <i class="fa-brands fa-whatsapp"></i> Kirim WA Massal
+                            </button>
+                        </div>
+
+                        <!-- Table Container -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+                            <div class="p-4 border-b bg-slate-50 flex justify-between items-center">
+                                <p class="text-sm font-medium text-slate-700">Daftar Siswa Belum Lunas</p>
+                                <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold border border-red-200" id="badge-tunggakan-count">0 Siswa</span>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="bg-white text-slate-600 border-b">
+                                        <tr>
+                                            <th class="py-3 px-4 font-semibold w-10">No.</th>
+                                            <th class="py-3 px-4 font-semibold">NIS</th>
+                                            <th class="py-3 px-4 font-semibold">Nama Lengkap</th>
+                                            <th class="py-3 px-4 font-semibold">Kelas</th>
+                                            <th class="py-3 px-4 font-semibold">No WA Ortu</th>
+                                            <th class="py-3 px-4 font-semibold text-center">Kirim Tagihan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-body-tagihan" class="divide-y divide-slate-100">
+                                        <!-- Data injected by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. PENGATURAN VIEW -->
                     <div id="view-pengaturan" class="view-section hidden animate-fade-in">
                         <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 max-w-2xl">
                             <h3 class="text-lg font-bold mb-4 border-b pb-2">Pengaturan Sistem</h3>
@@ -569,7 +696,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium mb-1">Pesan WhatsApp Tagihan</label>
-                                    <textarea class="w-full px-3 py-2 border rounded h-24 text-sm">Yth. Bapak/Ibu Orang Tua Wali dari [NAMA_SISWA]. Mengingatkan bahwa tagihan SPP bulan [BULAN] sebesar Rp[NOMINAL] belum dibayarkan. Terima kasih.</textarea>
+                                    <textarea id="setting-pesan-wa" class="w-full px-3 py-2 border rounded h-24 text-sm">Yth. Bapak/Ibu Orang Tua Wali dari [NAMA_SISWA]. Mengingatkan bahwa tagihan SPP bulan [BULAN] sebesar Rp[NOMINAL] belum dibayarkan. Terima kasih.</textarea>
                                 </div>
                                 <div class="pt-2">
                                     <button type="button" class="bg-primary text-white px-4 py-2 rounded hover:bg-blue-800 text-sm" onclick="showToast('Pengaturan dasar disimpan', 'success')">Simpan Pengaturan Dasar</button>
@@ -671,6 +798,33 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PROMO / PENAWARAN -->
+    <div id="modal-promo" class="fixed inset-0 bg-black bg-opacity-60 z-[200] flex items-center justify-center hidden opacity-0 transition-opacity duration-300 px-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300 text-center relative" id="modal-promo-content">
+            <button onclick="closePromoModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition z-10"><i class="fa-solid fa-times text-xl"></i></button>
+            <div class="bg-gradient-to-r from-primary to-secondary px-6 py-6 text-white">
+                <i class="fa-solid fa-rocket text-5xl mb-2 drop-shadow-md"></i>
+                <h3 class="font-bold text-2xl tracking-wide">Penawaran Spesial!</h3>
+            </div>
+            <div class="p-8">
+                <p class="text-lg font-bold text-slate-800 mb-6 leading-snug">Ingin Fitur Lebih Lengkap, yuk pesan aplikasinya sekarang</p>
+                
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-6 shadow-inner text-left">
+                    <p class="text-xs text-slate-500 font-medium uppercase mb-1 flex items-center gap-2"><i class="fa-solid fa-building-columns"></i> Bisa transfer melalui bank BRI</p>
+                    <p class="font-mono font-bold text-2xl text-primary tracking-wider my-1">009801023322533</p>
+                    <p class="text-sm font-semibold text-slate-700 flex items-center gap-2"><i class="fa-solid fa-user-circle"></i> a.n Supriyadi</p>
+                </div>
+                
+                <p class="text-sm text-slate-600 mb-3">Silahkan hubungi Supriyadi melalui WhatsApp:</p>
+                <button onclick="window.open('https://wa.me/6282371962881?text=Saya%20tertarik%20dan%20ingin%20pesan%20Aplikasi%20Smart%20SPP%20yang%20bapak%20buat', '_blank')" class="w-full bg-[#25D366] hover:bg-green-600 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition duration-200 shadow-lg shadow-green-200">
+                    <i class="fa-brands fa-whatsapp text-2xl"></i> Hubungi 082371962881
+                </button>
+                
+                <button onclick="closePromoModal()" class="mt-5 text-sm text-slate-400 hover:text-slate-600 underline decoration-slate-300 underline-offset-4 transition">Nanti Saja, Tutup</button>
             </div>
         </div>
     </div>
@@ -901,6 +1055,11 @@
                     initDashboard();
                     updateConnectionUI(GAS_URL && !isMock ? 'online' : (GAS_URL && isMock ? 'mock' : 'offline'));
                     showToast('Login berhasil! Selamat datang Admin.', 'success');
+                    
+                    // Munculkan pop-up promo setelah login berhasil
+                    setTimeout(() => {
+                        showPromoModal();
+                    }, 800);
                 }, 500);
             } catch (err) {
                 updateConnectionUI('error');
@@ -931,6 +1090,7 @@
                 'siswa': 'Manajemen Data Siswa',
                 'pembayaran': 'Transaksi Pembayaran',
                 'laporan': 'Laporan Keuangan',
+                'tagihan': 'Data Tunggakan & Tagihan',
                 'pengaturan': 'Pengaturan Sistem'
             };
             document.getElementById('header-title').innerText = titles[viewName];
@@ -952,8 +1112,53 @@
             // Trigger specific renders
             if(viewName === 'siswa') renderTableSiswa();
             if(viewName === 'pembayaran') renderTablePembayaran();
+            if(viewName === 'tagihan') renderTableTagihan();
             if(viewName === 'dashboard') updateChart(); // fix chart resize issue
         }
+
+        // --- PROMO MODAL LOGIC ---
+        function showPromoModal() {
+            const modal = document.getElementById('modal-promo');
+            const content = document.getElementById('modal-promo-content');
+            modal.classList.remove('hidden');
+            void modal.offsetWidth; // trigger reflow
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95');
+        }
+
+        function closePromoModal() {
+            const modal = document.getElementById('modal-promo');
+            const content = document.getElementById('modal-promo-content');
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        // Toggle Mobile Profile Menu
+        function toggleMobileProfileMenu() {
+            const menu = document.getElementById('mobile-profile-menu');
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                // Trigger reflow
+                void menu.offsetWidth;
+                menu.classList.remove('opacity-0', 'scale-95');
+            } else {
+                menu.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => {
+                    menu.classList.add('hidden');
+                }, 200);
+            }
+        }
+
+        // Close mobile profile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('mobile-profile-menu');
+            if (!menu) return;
+            const trigger = menu.previousElementSibling;
+            if (!menu.classList.contains('hidden') && !menu.contains(event.target) && !trigger.contains(event.target)) {
+                toggleMobileProfileMenu();
+            }
+        });
 
         // --- 3. TOAST NOTIFICATION SYSTEM ---
         function showToast(message, type = 'success') {
@@ -1153,8 +1358,8 @@
                     </td>
                     <td class="py-3 px-4 text-center">
                         <div class="flex justify-center gap-2">
-                            <button onclick="editSiswa('${siswa.nis}')" class="text-blue-500 hover:bg-blue-50 p-1.5 rounded"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button onclick="deleteSiswa('${siswa.nis}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="editSiswa('${siswa.nis}')" class="text-blue-500 hover:bg-blue-50 p-1.5 rounded" title="Edit Siswa"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteSiswa('${siswa.nis}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded" title="Hapus Siswa"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </td>
                 `;
@@ -1325,23 +1530,39 @@
             
             const recent = [...db_pembayaran].reverse(); // Terakhir di atas
             
+            if (recent.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-slate-500">Belum ada transaksi</td></tr>';
+                return;
+            }
+            
             recent.forEach(trx => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition";
                 tr.innerHTML = `
+                    <td class="py-3 px-4"><input type="checkbox" class="trx-checkbox rounded cursor-pointer" value="${trx.id}"></td>
                     <td class="py-3 px-4 font-mono text-xs text-slate-500">${trx.id}</td>
                     <td class="py-3 px-4 font-semibold text-slate-800">${trx.nama} <span class="text-xs font-normal text-slate-400 block">${trx.nis}</span></td>
                     <td class="py-3 px-4">${trx.bulan} ${trx.tahun}</td>
-                    <td class="py-3 px-4 font-bold text-primary">${formatRp(trx.nominal)}</td>
+                    <td class="py-3 px-4 font-bold text-primary text-right">${formatRp(trx.nominal)}</td>
                     <td class="py-3 px-4 text-center">
                         <span class="px-2 py-1 text-[10px] rounded bg-green-100 text-green-700 font-bold"><i class="fa-solid fa-check mr-1"></i>${trx.status}</span>
                     </td>
                     <td class="py-3 px-4 text-center">
-                        <button onclick="cetakKwitansi('${trx.id}')" class="text-slate-500 hover:text-primary" title="Cetak Kwitansi"><i class="fa-solid fa-print"></i></button>
+                        <div class="flex justify-center gap-2">
+                            <button onclick="cetakKwitansiPDF('${trx.id}')" class="text-slate-500 hover:text-blue-600 hover:bg-blue-50 p-1.5 rounded transition" title="Download PDF Kuitansi"><i class="fa-solid fa-file-pdf"></i></button>
+                            <button onclick="editPembayaran('${trx.id}')" class="text-slate-500 hover:text-amber-500 hover:bg-amber-50 p-1.5 rounded transition" title="Edit Transaksi"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deletePembayaran('${trx.id}')" class="text-slate-500 hover:text-red-500 hover:bg-red-50 p-1.5 rounded transition" title="Hapus Transaksi"><i class="fa-solid fa-trash"></i></button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        // Fitur Bulk Checklist
+        function toggleAllTrx(source) {
+            const checkboxes = document.querySelectorAll('.trx-checkbox');
+            checkboxes.forEach(cb => cb.checked = source.checked);
         }
 
         function autoFillSiswaPay() {
@@ -1403,9 +1624,70 @@
             btn.disabled = false;
         }
 
-        function cetakKwitansi(id) {
-            showToast(`Mencetak kwitansi ${id}...`, 'info');
-            // Logika generate PDF/print di sini
+        async function deletePembayaran(id) {
+            if(confirm(`Anda yakin ingin menghapus data transaksi ${id} secara permanen?`)) {
+                showToast('Menghapus transaksi...', 'info');
+                // Menggunakan payload format {nis: id} hanya sebagai numpang parameter karena di Code.gs hapusPembayaran menerima parameter data.nis di line 46
+                // Tunggu, lebih aman saya menggunakan fetch tapi mock jika error CORS.
+                const res = await callAPI('hapusPembayaran', { nis: id }); 
+                
+                if (res.status === 'success') {
+                    db_pembayaran = db_pembayaran.filter(t => t.id !== id);
+                    renderTablePembayaran();
+                    initDashboard();
+                    showToast('Transaksi berhasil dihapus (void).', 'success');
+                } else {
+                    showToast('Gagal menghapus transaksi.', 'error');
+                }
+            }
+        }
+
+        function editPembayaran(id) {
+            const trx = db_pembayaran.find(t => t.id === id);
+            if(!trx) return;
+
+            // Standard akuntansi: Edit dilakukan dengan menginput ulang lalu menghapus data yang lama.
+            if(confirm("Untuk menjaga validitas riwayat keuangan, mengedit transaksi akan menghapus data lama dan Anda harus menginput ulang nominal/metode. Lanjutkan?")) {
+                // Isi form dengan data lama
+                document.getElementById('pay-nis').value = trx.nis;
+                document.getElementById('pay-nama').value = trx.nama;
+                document.getElementById('pay-bulan').value = trx.bulan;
+                document.getElementById('pay-tahun').value = trx.tahun;
+                document.getElementById('pay-nominal').value = trx.nominal;
+                document.getElementById('pay-metode').value = trx.metode;
+                
+                // Panggil fitur hapus
+                deletePembayaran(id);
+                
+                // Arahkan kursor ke atas
+                window.scrollTo(0, 0);
+                document.getElementById('pay-nominal').focus();
+                showToast('Silakan perbaiki data pada form input dan klik "Proses Pembayaran".', 'info');
+            }
+        }
+
+        function cetakKwitansiPDF(id) {
+            const trx = db_pembayaran.find(t => t.id === id);
+            if (!trx) return;
+
+            // Populate data kuitansi
+            document.getElementById('k-id').innerText = trx.id;
+            document.getElementById('k-date').innerText = `Tgl: ${trx.tgl}`;
+            document.getElementById('k-nama').innerText = trx.nama;
+            document.getElementById('k-nis').innerText = trx.nis;
+            document.getElementById('k-bulan').innerText = `${trx.bulan} ${trx.tahun}`;
+            document.getElementById('k-metode').innerText = trx.metode;
+            document.getElementById('k-nominal').innerText = formatRp(trx.nominal);
+            document.getElementById('k-sign-nama').innerText = trx.nama; // Nama penyetor
+
+            // Tambahkan class agar layout kwitansi saja yang ter-print
+            document.body.classList.add('printing-kwitansi');
+            window.print();
+            
+            // Hapus class setelah dialog print tertutup
+            setTimeout(() => {
+                document.body.classList.remove('printing-kwitansi');
+            }, 1000);
         }
 
         // --- 7. LAPORAN LOGIC ---
@@ -1493,7 +1775,85 @@
                 showToast('Silakan klik Filter terlebih dahulu untuk memunculkan tabel!', 'error');
                 return;
             }
+            
+            document.body.classList.add('printing-laporan');
             window.print();
+            setTimeout(() => document.body.classList.remove('printing-laporan'), 1000);
+        }
+
+        // --- 8. TAGIHAN / TUNGGAKAN LOGIC ---
+        function renderTableTagihan() {
+            const bulan = document.getElementById('tagihan-bulan').value;
+            const tahun = document.getElementById('tagihan-tahun').value;
+            const tbody = document.getElementById('table-body-tagihan');
+            const badge = document.getElementById('badge-tunggakan-count');
+            
+            tbody.innerHTML = '';
+            
+            // Cari siapa saja yang sudah bayar di bulan & tahun yang dipilih
+            const trxBulanIni = db_pembayaran.filter(p => p.bulan === bulan && p.tahun.toString() === tahun);
+            const nisSudahBayar = trxBulanIni.map(p => p.nis);
+
+            // Cari siswa aktif yang NIS nya TIDAK ada di daftar yang sudah bayar
+            const activeSiswa = db_siswa.filter(s => s.status === 'Aktif');
+            const menunggak = activeSiswa.filter(s => !nisSudahBayar.includes(s.nis));
+
+            badge.innerText = `${menunggak.length} Siswa`;
+
+            if (menunggak.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-500 font-medium"><i class="fa-solid fa-check-circle text-green-500 text-3xl mb-2 block"></i>Luar biasa! Semua siswa sudah melunasi SPP bulan ${bulan}.</td></tr>`;
+                return;
+            }
+
+            menunggak.forEach((siswa, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 text-slate-500">${index + 1}</td>
+                    <td class="py-3 px-4 font-medium text-primary">${siswa.nis}</td>
+                    <td class="py-3 px-4 font-semibold text-slate-800">${siswa.nama}</td>
+                    <td class="py-3 px-4">${siswa.kelas}</td>
+                    <td class="py-3 px-4 text-slate-600">${siswa.hp || '-'}</td>
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="kirimWATagihan('${siswa.hp}', '${siswa.nama}', '${bulan}')" class="bg-green-100 text-green-700 hover:bg-green-600 hover:text-white px-3 py-1.5 rounded transition font-medium text-xs flex items-center justify-center gap-1 mx-auto border border-green-200">
+                            <i class="fa-brands fa-whatsapp"></i> Kirim Pesan
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function kirimWATagihan(hp, nama, bulan) {
+            if(!hp || hp === '-' || hp.trim() === '') {
+                showToast(`Data siswa ${nama} tidak memiliki No HP`, 'error');
+                return;
+            }
+            
+            // Format nomor HP (ubah format awal 0 menjadi 62)
+            let formattedHp = hp.replace(/[^0-9]/g, '');
+            if(formattedHp.startsWith('0')) {
+                formattedHp = '62' + formattedHp.substring(1);
+            }
+            
+            // Nominal diambil dari default (250000) dan diubah ke text tanpa symbol (karena symbol ditaruh di template)
+            const nominalStr = new Intl.NumberFormat('id-ID').format(250000); 
+            const templatePesan = document.getElementById('setting-pesan-wa').value;
+            
+            // Ganti [TAG] dengan data dinamis
+            let pesan = templatePesan
+                .replace('[NAMA_SISWA]', nama)
+                .replace('[BULAN]', bulan)
+                .replace('[NOMINAL]', nominalStr);
+                
+            const waUrl = `https://wa.me/${formattedHp}?text=${encodeURIComponent(pesan)}`;
+            window.open(waUrl, '_blank');
+        }
+
+        function kirimTagihanMassal() {
+            // Karena kebijakan Popup Blocker Chrome/Browser, membuka 50 tab WhatsApp sekaligus akan diblokir.
+            // Fitur massal ini diberi pesan notifikasi untuk alasan keamanan UX web.
+            alert("INFORMASI SISTEM:\n\nKarena batasan keamanan browser (Popup Blocker), fitur Kirim Pesan Massal via WhatsApp Web gratis disarankan untuk dikirim secara manual satu-per-satu melalui tombol di samping nama siswa.\n\nJika sekolah Anda menggunakan WhatsApp API Premium pihak ketiga, fitur massal ini dapat dikonfigurasi untuk terkirim secara diam-diam di latar belakang.");
         }
 
     </script>
