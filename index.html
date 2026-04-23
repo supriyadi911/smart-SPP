@@ -734,11 +734,9 @@
                 <button onclick="navigate('tagihan')" id="nav-mobile-tagihan" class="nav-item flex flex-col items-center justify-center w-12 h-12">
                     <div class="rounded-xl transition-all duration-300 icon-bg flex items-center justify-center w-10 h-10"><i class="fa-solid fa-file-invoice-dollar text-[1.1rem]"></i></div>
                 </button>
-                <div class="relative -top-5">
-                    <button onclick="navigate('pembayaran')" id="nav-mobile-pembayaran" class="bg-primary text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg shadow-blue-300 border-[4px] border-slate-50 transition transform active:scale-95">
-                        <i class="fa-solid fa-cash-register text-[1.1rem]"></i>
-                    </button>
-                </div>
+                <button onclick="navigate('pembayaran')" id="nav-mobile-pembayaran" class="nav-item flex flex-col items-center justify-center w-12 h-12">
+                    <div class="rounded-xl transition-all duration-300 icon-bg flex items-center justify-center w-10 h-10"><i class="fa-solid fa-cash-register text-[1.1rem]"></i></div>
+                </button>
                 <button onclick="navigate('laporan')" id="nav-mobile-laporan" class="nav-item flex flex-col items-center justify-center w-12 h-12">
                     <div class="rounded-xl transition-all duration-300 icon-bg flex items-center justify-center w-10 h-10"><i class="fa-solid fa-chart-pie text-[1.1rem]"></i></div>
                 </button>
@@ -807,27 +805,84 @@
 
     <!-- MODAL PROMO / PENAWARAN -->
     <div id="modal-promo" class="fixed inset-0 bg-black bg-opacity-60 z-[200] flex items-center justify-center hidden opacity-0 transition-opacity duration-300 px-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300 text-center relative" id="modal-promo-content">
-            <button onclick="closePromoModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition z-10"><i class="fa-solid fa-times text-xl"></i></button>
-            <div class="bg-gradient-to-r from-primary to-secondary px-6 py-6 text-white">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transform scale-95 transition-transform duration-300 text-center relative flex flex-col max-h-[90vh]" id="modal-promo-content">
+            <button onclick="closePromoModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition z-10 bg-black/20 hover:bg-black/40 rounded-full w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-times"></i></button>
+            
+            <!-- Header Promo -->
+            <div class="bg-gradient-to-r from-primary to-secondary px-6 py-6 text-white shrink-0">
                 <i class="fa-solid fa-rocket text-5xl mb-2 drop-shadow-md"></i>
                 <h3 class="font-bold text-2xl tracking-wide">Penawaran Spesial!</h3>
             </div>
-            <div class="p-8">
-                <p class="text-lg font-bold text-slate-800 mb-6 leading-snug">Ingin Fitur Lebih Lengkap, yuk pesan aplikasinya sekarang</p>
+            
+            <!-- Content Promo (Scrollable) -->
+            <div class="p-6 overflow-y-auto flex-1 text-left">
+                <p class="text-lg font-bold text-slate-800 mb-4 text-center leading-snug">Ingin Fitur Lebih Lengkap, yuk pesan aplikasinya sekarang</p>
                 
-                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-6 shadow-inner text-left">
-                    <p class="text-xs text-slate-500 font-medium uppercase mb-1 flex items-center gap-2"><i class="fa-solid fa-building-columns"></i> Bisa transfer melalui bank BRI</p>
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-6 shadow-inner text-center">
+                    <p class="text-xs text-slate-500 font-medium uppercase mb-1 flex items-center justify-center gap-2"><i class="fa-solid fa-building-columns"></i> Bisa transfer melalui bank BRI</p>
                     <p class="font-mono font-bold text-2xl text-primary tracking-wider my-1">009801023322533</p>
-                    <p class="text-sm font-semibold text-slate-700 flex items-center gap-2"><i class="fa-solid fa-user-circle"></i> a.n Supriyadi</p>
+                    <p class="text-sm font-semibold text-slate-700 flex items-center justify-center gap-2"><i class="fa-solid fa-user-circle"></i> a.n Supriyadi</p>
                 </div>
                 
-                <p class="text-sm text-slate-600 mb-3">Silahkan hubungi Supriyadi melalui WhatsApp:</p>
-                <button onclick="window.open('https://wa.me/6282371962881?text=Saya%20tertarik%20dan%20ingin%20pesan%20Aplikasi%20Smart%20SPP%20yang%20bapak%20buat', '_blank')" class="w-full bg-[#25D366] hover:bg-green-600 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition duration-200 shadow-lg shadow-green-200">
+                <button onclick="window.open('https://wa.me/6282371962881?text=Saya%20tertarik%20dan%20ingin%20pesan%20Aplikasi%20Smart%20SPP%20yang%20bapak%20buat', '_blank')" class="w-full bg-[#25D366] hover:bg-green-600 text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition duration-200 shadow-lg shadow-green-200 mb-6">
                     <i class="fa-brands fa-whatsapp text-2xl"></i> Hubungi 082371962881
                 </button>
-                
-                <button onclick="closePromoModal()" class="mt-5 text-sm text-slate-400 hover:text-slate-600 underline decoration-slate-300 underline-offset-4 transition">Nanti Saja, Tutup</button>
+
+                <!-- Deskripsi Paket (Baru) -->
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 text-sm text-slate-700 space-y-4">
+                    <p>Halo Bapak/Ibu 🙏</p>
+                    <p>Perkenalkan, kami menawarkan aplikasi <strong>SMART SPP</strong> untuk membantu pengelolaan administrasi keuangan sekolah menjadi lebih rapi, cepat, dan profesional.</p>
+                    
+                    <div>
+                        <p class="font-bold text-slate-800 mb-2 border-b pb-1">Berikut pilihan paket yang tersedia:</p>
+                        <ul class="space-y-4">
+                            <li>
+                                <div class="font-bold text-primary">🔹 Paket Standar (SPP Only)</div>
+                                <div class="text-slate-600 leading-relaxed">Fitur khusus pengelolaan pembayaran SPP siswa</div>
+                                <div class="font-medium text-slate-800">💰 Harga: Rp 500.000</div>
+                            </li>
+                            <li>
+                                <div class="font-bold text-primary">🔹 Paket Full Version</div>
+                                <div class="text-slate-600 leading-relaxed">Meliputi pembayaran SPP + 3 pembayaran (buku, seragam, daftar ulang)</div>
+                                <div class="font-medium text-slate-800">💰 Harga: Rp 1.000.000</div>
+                            </li>
+                            <li>
+                                <div class="font-bold text-primary">🔹 Paket Full Version + Garansi</div>
+                                <div class="text-slate-600 leading-relaxed">
+                                    Semua fitur Full Version + <br>
+                                    ✔ Pendampingan selama 3 bulan<br>
+                                    ✔ Upgrade 1 fitur sesuai request
+                                </div>
+                                <div class="font-medium text-slate-800 mt-1">💰 Harga: Rp 1.300.000</div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <p class="font-bold text-slate-800 mb-2 border-b pb-1">Keunggulan aplikasi:</p>
+                        <ul class="space-y-1 text-slate-600">
+                            <li>✅ Input & pengelolaan data siswa lengkap</li>
+                            <li>✅ Rekap laporan otomatis</li>
+                            <li>✅ Import & export Excel</li>
+                            <li>✅ Tampilan profesional & mudah digunakan</li>
+                            <li>✅ Cocok untuk admin/bendahara sekolah</li>
+                        </ul>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-200">
+                        <p class="mb-2">Jika Bapak/Ibu berminat atau ingin melihat demo aplikasi, silahkan kunjungi :</p>
+                        <a href="https://supriyadi911.github.io/smart-SPP/" target="_blank" class="text-blue-600 font-bold hover:underline break-all bg-blue-50 px-3 py-2 rounded block text-center border border-blue-100">
+                            https://supriyadi911.github.io/smart-SPP/
+                        </a>
+                    </div>
+                    
+                    <p class="pt-2 font-medium">Terima kasih 🙏</p>
+                </div>
+            </div>
+            
+            <!-- Footer Promo -->
+            <div class="p-4 border-t border-slate-100 bg-white shrink-0">
+                <button onclick="closePromoModal()" class="text-sm font-semibold text-slate-400 hover:text-slate-600 transition px-6 py-2 rounded-lg hover:bg-slate-100 w-full">Nanti Saja, Tutup</button>
             </div>
         </div>
     </div>
@@ -1110,7 +1165,7 @@
             
             // Mobile active state
             const mobNav = document.getElementById(`nav-mobile-${viewName}`);
-            if(mobNav && viewName !== 'pembayaran') { mobNav.classList.add('active'); }
+            if(mobNav) { mobNav.classList.add('active'); }
 
             // Trigger specific renders
             if(viewName === 'siswa') renderTableSiswa();
